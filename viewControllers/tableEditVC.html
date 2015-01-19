@@ -1,0 +1,69 @@
+<form method="post" id="tableEditForm">
+	<input type="hidden" name="columnOrdering" id="columnOrdering" />
+	<table class="form">
+		<tr>
+			<td>Table name</td>
+			<td>
+				{%if error%}
+					<div class="error">{{error}}</div>
+				{% end if %}
+				<input type="text" value="{{table.name}}" name="Name" />
+			</td>
+		</tr>
+		{% if table.id %}
+		<tr>
+			<td>Rows</td>
+			<td>
+				{{ table.rowCount }}
+			</td>
+		</tr>
+		<tr>
+			<td>Columns</td>
+			<td>
+				<ul id="sortable">
+					{% for column in table.columns %}
+					<li class="columnDraggable" id="{{ column.name }}">
+						<div class="title">{{ column.name }}</div>
+						<a class="editBtn" href="column/{{ url_escape(column.name) }}">Edit</a>
+					</li>
+					{% end for %}
+				</ul>
+			</td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td>
+				<a href="new-column">New column</a>
+			</td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td>
+				<input type="submit" value="Delete table" name="delete" id="btnDelete" />
+			</td>
+		</tr>
+		{% end if %}
+		<tr>
+			<td>&nbsp;</td>
+			<td>
+				<input type="submit" value="{{'Save changes' if table.id else 'Create table'}}" />
+			</td>
+		</tr>
+	</table>
+</form>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#sortable").sortable().disableSelection();
+	$("#tableEditForm").submit(function(e){
+		var sortedIDs = $("#sortable").sortable("toArray");
+		$("#columnOrdering").val(JSON.stringify(sortedIDs));
+	});
+	$("#btnDelete").click(function(e){
+		var toDelete = confirm("Are you sure you wish to delete the table?")
+		if (!toDelete) {
+			e.preventDefault();
+		}
+	});
+});
+</script>

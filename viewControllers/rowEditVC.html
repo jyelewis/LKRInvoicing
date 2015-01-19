@@ -1,0 +1,64 @@
+<form method="post">
+		{% for cell in row.cells %}
+			{% if (isInsert and cell.column.showsOnInsert) or (not isInsert and cell.column.showsOnUpdate) %}
+			<div class="editCell" id="editCell_{{cell.column.dbname}}">
+				<h2>{{cell.column.name}}</h2>
+				{% raw cell.editHTML %}
+			</div>
+			{% end if %}
+		{% end for %}
+	<input type="hidden" name="jsonValues" id="jsonValues" value="asdfqwer" />
+	<input type="submit" value="Save" id="btnSave" />
+	<input type="submit" value="Delete" name="Delete" id="btnDelete" /> 
+</form>
+	
+<script>
+	$(document).ready(function(){
+		var retriveCode = {}
+		{% for cell in row.cells %}
+			{% if (isInsert and cell.column.showsOnInsert) or (not isInsert and cell.column.showsOnUpdate) %}
+				retriveCode['{{cell.column.dbname}}'] = [atob("{% raw base64.b64encode(bytes(cell.initCode, 'utf8')) %}"), atob("{% raw base64.b64encode(bytes(cell.retriveCode, 'utf8')) %}")]
+			{% end if %}
+		{% end for %}
+		
+		$("#btnSave").click(function(e){
+			var valid = true;
+			var objs = {}
+			for(cellID in retriveCode) {
+				(function(env){
+					var selFunc = function(selector){
+						var sel = jQuery(selector, env);
+						return sel;
+					}
+					value = eval("(function(cellID, $){ " + retriveCode[cellID][1] + "})('"+cellID+"', selFunc)");
+					if (typeof value == 'undefined'){
+						valid = false;
+					}
+					objs[cellID] = value;
+				})("#editCell_"+cellID);
+			}
+			if (valid){
+				$("#jsonValues").val(JSON.stringify(objs))
+			} else {
+				e.preventDefault();
+			}
+		});
+		
+		//run the init code
+		for(cellID in retriveCode) {
+			(function(env){
+				var selFunc = function(selector){
+					var sel = jQuery(selector, env);
+					return sel;
+				}
+				eval("(function(cellID, $){ " + retriveCode[cellID][0] + "})('"+cellID+"', selFunc)");
+			})("#editCell_"+cellID);
+		}
+	});
+	$("#btnDelete").click(function(e){
+		var toDelete = confirm("Are you sure you wish to delete the row?")
+		if (!toDelete) {
+			e.preventDefault();
+		}
+	});
+</script>

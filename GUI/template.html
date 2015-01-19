@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" class="{{ 'modal' if not sidebar else '' }}">
+<head>
+	<meta charset="utf-8" />
+	<title>LKR Invoicing - Developed by Jye Lewis</title>
+	
+	<link type="text/css" href="/Resources/css/style.css" rel="stylesheet">
+	<script type="text/javascript" src="/Resources/js/jquery.js"></script>
+	
+	<script type="text/javascript" src="/Resources/jqueryui/jquery-ui.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="/Resources/jqueryui/jquery-ui.min.css" media="screen" />
+		
+	<script type="text/javascript" src="/Resources/js/jquery.ui.touch-punch.min.js"></script>
+
+
+	<script type="text/javascript" src="/Resources/ckeditor/ckeditor.js"></script>
+	<script type="text/javascript" src="/Resources/ckeditor/adapters/jquery.js"></script>
+	
+	<script type="text/javascript" src="/Resources/js/jquery.fancybox.js?v=2.1.5"></script>
+	<link rel="stylesheet" type="text/css" href="/Resources/js/jquery.fancybox.css?v=2.1.5" media="screen" />
+	
+	<script type="text/javascript" src="/Resources/js/dataplus.js"></script>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0;">
+	<link rel="apple-touch-icon" href="/Resources/touch-icon-iphone.png">
+</head>
+<body>
+	
+
+	{% if not sidebar %}
+		{% raw CPH %}
+	{% else %}
+		<div id="contentWindow">
+			{% raw CPH %}
+		</div>	
+	
+		<div id="sidebar">
+			<img src="/Resources/logo.png" alt="LKR" />
+
+			<ul class="sidebarList">
+				{% for table in tables %}
+					<li class="{{'active' if url.startswith('/table/'+url_escape(table)+'?') or url.startswith('/table/'+url_escape(table)+'/') or url == '/table/'+url_escape(table) else ''}}">
+						<a href="/table/{{ url_escape(table) }}" class="link">{{ table }}</a>
+						<!--<a class="edit" href="/table/{{ url_escape(table) }}/edit">edit</a>-->
+						<div class="clear"></div>
+					</li>
+				{% end %}
+			</ul>
+		</div>
+	{% end if %}
+</body>
+</html>

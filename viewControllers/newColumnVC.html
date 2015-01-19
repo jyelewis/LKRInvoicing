@@ -1,0 +1,30 @@
+<h1>Create column on table {{table.name}}</h1>
+<form method="post" id="tableEditForm">
+	<table class="form">
+		<tr>
+			<td>Column name</td>
+			<td>
+				<input type="text" value="" name="Name" />
+				{%if error%}
+					<div class="error">{{error}}</div>
+				{%end if%}
+			</td>
+		</tr>
+		<tr>
+			<td>Datatype</td>
+			<td>
+				<select name="Datatype">
+					{% for datatype in [x for x in sorted(datatypes)] %}
+						<option value="{{datatype}}" {{'selected="selected"' if datatype == "Text" else ''}}>{{datatype}}</option>
+					{% end for %}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td>
+				<input type="submit" value="Create column" />
+			</td>
+		</tr>
+	</table>
+</form>

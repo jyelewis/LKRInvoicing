@@ -1,0 +1,57 @@
+<form method="post" id="columnForm">
+	<input type="hidden" name="columnMetadata" id="columnMetadata" />
+	<table class="form">
+		<tr>
+			<td>Column name</td>
+			<td>
+				<input type="text" value="{{ column.name }}" name="Name" />
+			</td>
+		</tr>
+		<tr>
+			<td>Datatype</td>
+			<td>
+				{{ column.datatype }}
+			</td>
+		</tr>
+		<tr>
+			<td>Visible</td>
+			<td>
+				<input type="checkbox" {% if column.visible %}checked="checked" {%end if%}name="Visible" />
+			</td>
+		</tr>
+		
+		{% raw column.editHTML %}
+		
+		<tr>
+			<td>&nbsp;</td>
+			<td>
+				<input type="submit" value="Save changes" id="btnSubmit" />
+			</td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td>
+				<input type="submit" value="Delete" name="delete" id="btnDelete" />
+			</td>
+		</tr>
+	</table>
+</form>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#btnDelete").click(function(e){
+		var toDelete = confirm("Are you sure you wish to delete the column?")
+		if (!toDelete) {
+			e.preventDefault();
+		}
+	});
+	$("#columnForm").submit(function(e){
+		var retMetadata = eval("(function(){ " + atob("{% raw base64.b64encode(bytes(column.retriveCode, 'utf8')) %}") + "})()");
+		if (typeof retMetadata == 'undefined'){
+			e.preventDefault();
+		} else {
+			$("#columnMetadata").val(JSON.stringify(retMetadata))
+		}
+	})
+});
+</script>

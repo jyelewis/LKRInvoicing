@@ -1,0 +1,9 @@
+{% for cell in row.cells %}
+	<div class="editCell">
+		<h2>{{cell.column.name}}</h2>
+		{% raw cell.largeViewHTML %}
+	</div>
+{% end for %}
+
+<br />
+<button onclick="location.href='/table/{{row.table.name}}/row/{{row.id}}/edit?Modal=1'">Edit row</button>

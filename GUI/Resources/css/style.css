@@ -1,0 +1,244 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0; }
+
+html.modal {
+  height: auto; }
+  html.modal body {
+    height: auto;
+    background-color: transparent; }
+
+body {
+  font-family: Arial;
+  color: #222222;
+  background-color: white; }
+  @media only screen and (min-width: 320px) and (max-width: 800px) {
+    body {
+      font-size: 13px; } }
+
+* {
+  box-sizing: border-box; }
+
+.clear {
+  clear: both; }
+
+a {
+  color: #cc0000; }
+
+#sidebar {
+  width: 300px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background-color: whitesmoke;
+  height: 100%;
+  overflow: auto;
+  box-shadow: 2px 0px 5px rgba(50, 50, 50, 0.5);
+  padding: 20px; }
+  #sidebar h1 {
+    font-size: 30px;
+    padding-left: 15px;
+    margin-bottom: 10px; }
+  @media only screen and (min-width: 320px) and (max-width: 800px) {
+    #sidebar {
+      position: static;
+      width: 100%;
+      height: auto; } }
+
+#contentWindow {
+  position: absolute;
+  left: 300px;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  height: 100%;
+  overflow: auto;
+  padding: 30px; }
+  @media only screen and (min-width: 320px) and (max-width: 800px) {
+    #contentWindow {
+      position: static;
+      height: auto; } }
+
+a {
+  text-decoration: none; }
+  a:hover {
+    text-decoration: underline; }
+
+.smallRed {
+  font-size: 12px;
+  color: #cc0000; }
+
+a#newTable {
+  float: right;
+  margin-top: -28px; }
+
+ul.sidebarList {
+  margin: 0;
+  padding: 0;
+  list-style: none; }
+  ul.sidebarList li {
+    border-bottom: 1px solid #fff; }
+    ul.sidebarList li:last-child {
+      border-bottom: none; }
+    ul.sidebarList li.active a.link {
+      font-weight: bold;
+      width: calc(100% - 30px); }
+      ul.sidebarList li.active a.link:hover {
+        margin-left: 0; }
+    ul.sidebarList li.active a.edit {
+      display: block; }
+    ul.sidebarList li a.link {
+      padding: 10px 5px;
+      display: block;
+      color: #333;
+      transition: margin 0.2s ease;
+      float: left;
+      width: 100%; }
+      ul.sidebarList li a.link:hover {
+        text-decoration: none;
+        margin-left: 10px; }
+    ul.sidebarList li a.edit {
+      display: none;
+      float: left;
+      font-size: 15px;
+      margin-top: 9px;
+      color: #cc0000; }
+
+#tableView {
+  border-collapse: collapse;
+  width: calc(100% - 1px); }
+  #tableView.selectable tr:hover td {
+    background-color: #bbbbbb; }
+  #tableView th.edit, #tableView td.edit {
+    background-color: transparent !important;
+    width: 30px;
+    border: none !important;
+    font-size: 12px;
+    opacity: 0.2;
+    padding: 0;
+    margin: 0; }
+  #tableView th {
+    background-color: #cccccc; }
+    #tableView th a {
+      color: #000; }
+    #tableView th a.order:after {
+      content: '';
+      display: inline-block;
+      margin-left: 5px;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 0 8px 8px 8px;
+      border-color: transparent transparent #666 transparent; }
+  #tableView td, #tableView th {
+    padding: 5px 10px;
+    border-left: 1px solid #999; }
+    #tableView td:last-child, #tableView th:last-child {
+      border-right: 1px solid #999; }
+  #tableView tr {
+    cursor: pointer; }
+    #tableView tr:hover .edit {
+      opacity: 1; }
+    #tableView tr:first-child th {
+      border-top: 1px solid #999; }
+    #tableView tr:last-child td, #tableView tr:last-child th {
+      border-bottom: 1px solid #999; }
+    #tableView tr:nth-child(odd) td {
+      background-color: white; }
+    #tableView tr:nth-child(even) td {
+      background-color: #eeeeee; }
+  #tableView #pag td {
+    background-color: #cccccc; }
+  #tableView #pag .leftText {
+    float: left;
+    font-weight: bold;
+    padding-top: 3px;
+    font-size: 16px; }
+    #tableView #pag .leftText a {
+      color: red;
+      margin-left: 10px; }
+  #tableView #pag .rightArrows {
+    float: right;
+    font-size: 13px; }
+    #tableView #pag .rightArrows input {
+      width: 20px;
+      font-size: 13px;
+      border: 1px solid #999999;
+      outline: none;
+      background-color: transparent;
+      text-align: center;
+      font-family: Arial; }
+
+table.form td:first-child {
+  text-align: right;
+  vertical-align: top; }
+
+ul#sortable {
+  margin: 0;
+  padding: 0;
+  list-style: none; }
+  ul#sortable .columnDraggable {
+    width: 250px;
+    height: 40px;
+    background-color: whitesmoke;
+    padding: 5px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    border: 1px solid #999999; }
+    ul#sortable .columnDraggable .title {
+      float: left;
+      max-width: 250px;
+      overflow: hidden;
+      margin-top: 5px;
+      font-weight: bold; }
+    ul#sortable .columnDraggable .editBtn {
+      display: block;
+      float: right;
+      width: 50px;
+      height: 100%;
+      text-decoration: none !important;
+      text-align: center;
+      padding-top: 5px;
+      border-radius: 8px;
+      box-shadow: inset 0 0 5px 2px rgba(50, 50, 50, 0.5);
+      color: #cc0000; }
+
+.error {
+  color: #ff5555;
+  font-size: 12px; }
+
+.editCell {
+  padding: 10px;
+  border-bottom: 1px solid #cccccc; }
+  .editCell h2 {
+    margin: 0;
+    padding: 0;
+    margin-bottom: 4px;
+    font-size: 15px; }
+
+a.fkLink {
+  color: #222222;
+  text-decoration: underline; }
+
+.arrow {
+  display: inline-block;
+  position: relative;
+  top: 3px;
+  cursor: pointer; }
+  .arrow.left {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 7.5px 13.0px 7.5px 0;
+    border-color: transparent #666666 transparent transparent; }
+  .arrow.right {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 7.5px 0 7.5px 13.0px;
+    border-color: transparent transparent transparent #666666; }
+
+.ui-datepicker {
+  font-size: 14px !important; }

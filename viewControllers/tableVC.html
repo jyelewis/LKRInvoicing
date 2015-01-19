@@ -1,0 +1,100 @@
+{% if table.rowCount > 0 %}
+	{% if isSelectModal %}
+		<h2>Select a row</h2>
+	{% end if %}
+	<table id="tableView" class="{{'selectable' if isSelectModal else ''}}">
+		<thead>
+			<tr>
+				{% if not isSelectModal %}
+					<th class="edit">&nbsp;</th> <!-- edit column -->
+				{% end if %}
+				{% for column in dataset.columns %}
+					{% if column.visible %}
+						<th><a href="{{ getURL({"OrderBy": column.name}) }}" class="{{ 'order' if column.name == orderColumn else ''}}">{{ column.name }}</th>
+					{% end if %}
+				{% end for %}
+			</tr>
+		</thead>
+		<tbody>
+			{% for row in dataset.rows[pag['fromRows']:pag['toRows']] %}
+			<tr data-id="{{row.id}}" title="Double click to view">
+				{% if not isSelectModal %}
+					<td class="edit">
+						<a href="/table/{{table.name}}/row/{{row.id}}/edit{{editURL}}">edit</a>
+					</td>
+				{% end if %}
+				{% for index, cell in enumerate(row.cells) %}
+					{% if cell.column.visible %}
+					<td>{% raw cell.viewHTML %}</td>
+					{% end if %}
+				{% end for %}
+			</tr>
+			{% end for %}
+		
+			<tr id="pag">
+				{% if not isSelectModal %}
+					<td class="edit"></td>
+				{% end if %}
+				<td colspan="100">
+					<div class="leftText">
+						Showing rows {{pag['fromRows']+1}} to {{pag['toRows']}} (of {{table.rowCount}})
+						<a href="/table/{{table.name}}/new-row{{editURL}}">New row</a>
+					</div>
+				
+					<div class="rightArrows">
+						{% if pag['page'] > 1 %}
+							<a class="arrow left" href="{{ getURL({"Page": pag['page']-1 }) }}"></a>
+						{% end if %}
+					
+						page <input type="text" value="{{pag['page']}}" data-defaultValue="{{pag['page']}}" id="pagInput" /> of {{pag['totalPages']}}
+					
+						{% if pag['page'] != pag['totalPages'] %}
+							<a class="arrow right" href="{{ getURL({"Page": pag['page']+1 }) }}"></a>
+						{% end if %}
+					</div>
+					<div class="clear">
+				</td>
+			</tr>
+		</tbody>
+	</table>
+{% else %}
+	<h2>No rows!</h2>
+	<a href="/table/{{table.name}}/new-row{{editURL}}">New row</a>
+{% end if %}
+
+
+<script type="text/javascript">
+	
+	$("#pagInput").blur(function(){
+		var value = $(this).val()
+		if(!isNaN(value)){
+			location.href = "{{ getURL({'Page': None}) }}&Page=" + value;
+		} else {
+			$(this).val($(this).attr("data-defaultValue"))
+		}
+	}).keypress(function(e){
+		if(e.which == 13){ //enter key pressed
+			$(this).blur();
+		}
+	});
+	
+	$("#tableView:not(.selectable) tr").dblclick(function(){
+		if (!$(this).attr("data-id")){ return; }
+		//clear selection
+		if(document.selection && document.selection.empty) {
+			document.selection.empty();
+		} else if(window.getSelection) {
+			var sel = window.getSelection();
+			sel.removeAllRanges();
+		}
+    	//view row
+		dataplus.viewRow("{{table.name}}", $(this).attr("data-id"));
+	});
+	
+	$("#tableView.selectable tr").click(function(){
+		var id = $(this).attr("data-id");
+		if (id){
+			window.parent.selectRowModalCallback(id);
+		}
+	});
+</script>
