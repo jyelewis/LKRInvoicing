@@ -74,6 +74,7 @@ else:
     from hashlib import md5
 import uuid
 
+
 class PdfFileWriter(object):
     """
     This class supports writing PDF files out, given pages produced by another
@@ -516,7 +517,6 @@ class PdfFileWriter(object):
 
         return bookmarkRef
 
-
     def addBookmark(self, title, pagenum, parent=None, color=None, bold=False, italic=False, fit='/Fit', *args):
         """
         Add a bookmark to this PDF file.
@@ -552,7 +552,6 @@ class PdfFileWriter(object):
 
         if parent == None:
             parent = outlineRef
-
 
         bookmark = TreeObject()
 
@@ -871,6 +870,7 @@ class PdfFileWriter(object):
     """Read and write property accessing the :meth:`getPageMode()<PdfFileWriter.getPageMode>`
     and :meth:`setPageMode()<PdfFileWriter.setPageMode>` methods."""
 
+
 class PdfFileReader(object):
     """
     Initializes a PdfFileReader object.  This operation can take some time, as
@@ -1160,7 +1160,14 @@ class PdfFileReader(object):
 
             # get the outline dictionary and named destinations
             if "/Outlines" in catalog:
-                lines = catalog["/Outlines"]
+                try:
+                    lines = catalog["/Outlines"]
+                except utils.PdfReadError:
+                    # this occurs if the /Outlines object reference is incorrect
+                    # for an example of such a file, see https://unglueit-files.s3.amazonaws.com/ebf/7552c42e9280b4476e59e77acc0bc812.pdf
+                    # so continue to load the file without the Bookmarks
+                    return outlines
+                    
                 if "/First" in lines:
                     node = lines["/First"]
             self._namedDests = self.getNamedDestinations()
@@ -1347,7 +1354,6 @@ class PdfFileReader(object):
         if self.strict: raise utils.PdfReadError("This is a fatal error in strict mode.")
         return NullObject()
 
-
     def getObject(self, indirectReference):
         debug = False
         if debug: print(("looking at:", indirectReference.idnum, indirectReference.generation))
@@ -1470,7 +1476,7 @@ class PdfFileReader(object):
             startxref = int(line)
         except ValueError:
             # 'startxref' may be on the same line as the location
-            if not line.startswith("startxref"):
+            if not line.startswith(b_("startxref")):
                 raise utils.PdfReadError("startxref not found")
             startxref = int(line[9:].strip())
             warnings.warn("startxref on same line as offset")
@@ -1580,6 +1586,7 @@ class PdfFileReader(object):
                 assert len(entrySizes) >= 3
                 if self.strict and len(entrySizes) > 3:
                     raise utils.PdfReadError("Too many entry sizes: %s" %entrySizes)
+
                 def getEntry(i):
                     # Reads the correct number of bytes for each entry. See the
                     # discussion of the W parameter in PDF spec table 17.
@@ -1683,7 +1690,6 @@ class PdfFileReader(object):
                     #if not, then either it's just plain wrong, or the non-zero-index is actually correct
             stream.seek(loc, 0) #return to where it was
 
-
     def _zeroXref(self, generation):
         self.xref[generation] = dict( (k-self.xrefIndex, v) for (k, v) in list(self.xref[generation].items()) )
 
@@ -1700,8 +1706,13 @@ class PdfFileReader(object):
         if debug: print(">>readNextEndLine")
         line = b_("")
         while True:
+            # Prevent infinite loops in malformed PDFs
+            if stream.tell() == 0:
+                raise utils.PdfReadError("Could not read malformed PDF file")
             x = stream.read(1)
             if debug: print(("  x:", x, "%x"%ord(x)))
+            if stream.tell() < 2:
+                raise utils.PdfReadError("EOL marker not found")
             stream.seek(-2, 1)
             if x == b_('\n') or x == b_('\r'): ## \n = LF; \r = CR
                 crlf = False
@@ -1713,6 +1724,8 @@ class PdfFileReader(object):
                     if x == b_('\n') or x == b_('\r'): # account for CR+LF
                         stream.seek(-1, 1)
                         crlf = True
+                    if stream.tell() < 2:
+                        raise utils.PdfReadError("EOL marker not found")
                     stream.seek(-2, 1)
                 stream.seek(2 if crlf else 1, 1) #if using CR+LF, go back 2 bytes, else 1
                 break
@@ -1827,13 +1840,16 @@ def getRectangle(self, name, defaults):
     setRectangle(self, name, retval)
     return retval
 
+
 def setRectangle(self, name, value):
     if not isinstance(name, NameObject):
         name = NameObject(name)
     self[name] = value
 
+
 def deleteRectangle(self, name):
     del self[name]
+
 
 def createRectangleAccessor(name, fallback):
     return \
@@ -1842,6 +1858,7 @@ def createRectangleAccessor(name, fallback):
             lambda self, value: setRectangle(self, name, value),
             lambda self: deleteRectangle(self, name)
             )
+
 
 class PageObject(DictionaryObject):
     """
@@ -2412,6 +2429,7 @@ class PageObject(DictionaryObject):
     page's creator.
     """
 
+
 class ContentStream(DecodedStreamObject):
     def __init__(self, stream, pdf):
         self.pdf = pdf
@@ -2437,25 +2455,25 @@ class ContentStream(DecodedStreamObject):
             if peek == b_('') or ord_(peek) == 0:
                 break
             stream.seek(-1, 1)
-            if peek.isalpha() or peek == "'" or peek == '"':
+            if peek.isalpha() or peek == b_("'") or peek == b_('"'):
                 operator = utils.readUntilRegex(stream,
                         NameObject.delimiterPattern, True)
-                if operator == "BI":
+                if operator == b_("BI"):
                     # begin inline image - a completely different parsing
                     # mechanism is required, of course... thanks buddy...
                     assert operands == []
                     ii = self._readInlineImage(stream)
-                    self.operations.append((ii, "INLINE IMAGE"))
+                    self.operations.append((ii, b_("INLINE IMAGE")))
                 else:
                     self.operations.append((operands, operator))
                     operands = []
-            elif peek == '%':
+            elif peek == b_('%'):
                 # If we encounter a comment in the content stream, we have to
                 # handle it here.  Typically, readObject will handle
                 # encountering a comment -- but readObject assumes that
                 # following the comment must be the object we're trying to
                 # read.  In this case, it could be an operator instead.
-                while peek not in ('\r', '\n'):
+                while peek not in (b_('\r'), b_('\n')):
                     peek = stream.read(1)
             else:
                 operands.append(readObject(stream, None))
@@ -2467,7 +2485,7 @@ class ContentStream(DecodedStreamObject):
         while True:
             tok = readNonWhitespace(stream)
             stream.seek(-1, 1)
-            if tok == "I":
+            if tok == b_("I"):
                 # "ID" - begin of image data
                 break
             key = readObject(stream, self.pdf)
@@ -2477,16 +2495,16 @@ class ContentStream(DecodedStreamObject):
             settings[key] = value
         # left at beginning of ID
         tmp = stream.read(3)
-        assert tmp[:2] == "ID"
-        data = ""
+        assert tmp[:2] == b_("ID")
+        data = b_("")
         while True:
             tok = stream.read(1)
-            if tok == "E":
+            if tok == b_("E"):
                 # Check for End Image
                 next1 = stream.read(1)
-                if next1 == "I":
+                if next1 == b_("I"):
                     next2 = readNonWhitespace(stream)
-                    if next2 == 'Q':
+                    if next2 == b_('Q'):
                         stream.seek(-1, 1)
                         break
                     else:
@@ -2497,7 +2515,7 @@ class ContentStream(DecodedStreamObject):
                     data += tok
             else:
                 data += tok
-        x = readNonWhitespace(stream)
+        readNonWhitespace(stream)
         stream.seek(-1, 1)
         return {"settings": settings, "data": data}
 
@@ -2524,6 +2542,7 @@ class ContentStream(DecodedStreamObject):
         self.__parseContentStream(BytesIO(b_(value)))
 
     _data = property(_getData, _setData)
+
 
 class DocumentInformation(DictionaryObject):
     """
@@ -2588,6 +2607,7 @@ class DocumentInformation(DictionaryObject):
     producer_raw = property(lambda self: self.get("/Producer"))
     """The "raw" version of producer; can return a ``ByteStringObject``."""
 
+
 def convertToInt(d, size):
     if size > 8:
         raise utils.PdfReadError("invalid size in convertToInt")
@@ -2599,6 +2619,7 @@ def convertToInt(d, size):
 _encryption_padding = b_('\x28\xbf\x4e\x5e\x4e\x75\x8a\x41\x64\x00\x4e\x56') + \
         b_('\xff\xfa\x01\x08\x2e\x2e\x00\xb6\xd0\x68\x3e\x80\x2f\x0c') + \
         b_('\xa9\xfe\x64\x53\x69\x7a')
+
 
 # Implementation of algorithm 3.2 of the PDF standard security handler,
 # section 3.5.2 of the PDF 1.6 reference.
@@ -2643,6 +2664,7 @@ def _alg32(password, rev, keylen, owner_entry, p_entry, id1_entry, metadata_encr
     # entry.
     return md5_hash[:keylen]
 
+
 # Implementation of algorithm 3.3 of the PDF standard security handler,
 # section 3.5.2 of the PDF 1.6 reference.
 def _alg33(owner_pwd, user_pwd, rev, keylen):
@@ -2670,6 +2692,7 @@ def _alg33(owner_pwd, user_pwd, rev, keylen):
     # the /O entry in the encryption dictionary.
     return val
 
+
 # Steps 1-4 of algorithm 3.3
 def _alg33_1(password, rev, keylen):
     # 1. Pad or truncate the owner password string as described in step 1 of
@@ -2692,6 +2715,7 @@ def _alg33_1(password, rev, keylen):
     key = md5_hash[:keylen]
     return key
 
+
 # Implementation of algorithm 3.4 of the PDF standard security handler,
 # section 3.5.2 of the PDF 1.6 reference.
 def _alg34(password, owner_entry, p_entry, id1_entry):
@@ -2705,6 +2729,7 @@ def _alg34(password, owner_entry, p_entry, id1_entry):
     # 3. Store the result of step 2 as the value of the /U entry in the
     # encryption dictionary.
     return U, key
+
 
 # Implementation of algorithm 3.4 of the PDF standard security handler,
 # section 3.5.2 of the PDF 1.6 reference.

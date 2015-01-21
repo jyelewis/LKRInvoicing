@@ -48,6 +48,8 @@ import codecs
 ObjectPrefix = b_('/<[tf(n%')
 NumberSigns = b_('+-')
 IndirectPattern = re.compile(b_(r"(\d+)\s+(\d+)\s+R[^a-zA-Z]"))
+
+
 def readObject(stream, pdf):
     tok = stream.read(1)
     stream.seek(-1, 1) # reset to start
@@ -93,6 +95,7 @@ def readObject(stream, pdf):
             return IndirectObject.readFromStream(stream, pdf)
         else:
             return NumberObject.readFromStream(stream)
+
 
 class PdfObject(object):
     def getObject(self):
@@ -225,6 +228,7 @@ class FloatObject(decimal.Decimal, PdfObject):
             return decimal.Decimal.__new__(cls, utils.str_(value), context)
         except:
             return decimal.Decimal.__new__(cls, str(value))
+
     def __repr__(self):
         if self == self.to_integral():
             return str(self.quantize(decimal.Decimal(1)))
@@ -253,16 +257,7 @@ class NumberObject(int, PdfObject):
         stream.write(b_(repr(self)))
 
     def readFromStream(stream):
-        num = b_("")
-        while True:
-            tok = stream.read(16)
-            m = NumberObject.NumberPattern.search(tok)
-            if m is not None:
-                stream.seek(m.start() - len(tok), 1)
-                num += tok[:m.start()]
-                break
-
-            num += tok
+        num = utils.readUntilRegex(stream, NumberObject.NumberPattern)
         if num.find(NumberObject.ByteDot) != -1:
             return FloatObject(num)
         else:
@@ -630,6 +625,7 @@ class DictionaryObject(dict, PdfObject):
             return retval
     readFromStream = staticmethod(readFromStream)
 
+
 class TreeObject(DictionaryObject):
     def __init__(self):
         DictionaryObject.__init__(self)
@@ -725,7 +721,6 @@ class TreeObject(DictionaryObject):
                         self[NameObject('/Count')] = self[NameObject('/Count')] - 1
                 found = True
                 break
-
 
             prevRef = curRef
             prev = cur
@@ -938,6 +933,7 @@ class RectangleObject(ArrayObject):
     in (x,y) form.
     """
 
+
 class Field(TreeObject):
     """
     A class representing a field dictionary. This class is accessed through
@@ -1008,6 +1004,7 @@ class Field(TreeObject):
     This dictionary defines the field's behavior in response to trigger events.
     See Section 8.5.2 of the PDF 1.7 reference.
     """
+
 
 class Destination(TreeObject):
     """
@@ -1157,6 +1154,7 @@ def encode_pdfdocencoding(unicode_string):
                     "does not exist in translation table")
     return retval
 
+
 def decode_pdfdocencoding(byte_array):
     retval = u_('')
     for b in byte_array:
@@ -1211,4 +1209,3 @@ for i in range(256):
         continue
     assert char not in _pdfDocEncoding_rev
     _pdfDocEncoding_rev[char] = i
-
