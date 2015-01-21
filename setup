@@ -1,0 +1,19 @@
+cd "$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+
+#install tornado
+pip install --target=$(pwd)/tornado_project tornado
+mv tornado_project/tornado tornado
+rm -rf tornado_project
+
+#install pyPDF2 - PYPDF2 IS BROKEN UNDER PIP, HAS BEEN LEFT IN THE REPO
+#pip install --target=$(pwd)/pyPDF2_project pyPDF2
+#mv pyPDF2_project/PyPDF2 pyPDF2
+#rm -rf pyPDF2_project
+
+
+#install reportlab
+pip install --target=$(pwd)/reportlab_project reportlab
+mv reportlab_project/reportlab reportlab
+rm -rf reportlab_project
+
