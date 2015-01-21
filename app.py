@@ -41,6 +41,7 @@ application = tornado.web.Application([
 
 if __name__ == "__main__":
     application.listen(portNumber)
+    print("Running LKRInvoicing at port", portNumber)
     tornado.ioloop.IOLoop.instance().start()
     	
 

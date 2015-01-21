@@ -1,7 +1,7 @@
 import sqlite3
 
 
-rawDb = sqlite3.connect('database.db')
+rawDb = sqlite3.connect('DATA/database.db')
 
 tablePrefix = "tbl_"
 

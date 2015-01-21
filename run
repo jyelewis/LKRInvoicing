@@ -1,2 +1,2 @@
 cd "$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-python3.4 app.py
+python3.4 app.py $1
