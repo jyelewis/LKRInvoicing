@@ -6,6 +6,15 @@ import random
 import subprocess
 import dataModel
 
+def tryInt(value):
+	retValue = 0;
+	try:
+		retValue = int(value);
+	except ValueError:
+		retValue = float(value);
+	
+	return retValue
+
 def generateInvoice(invoice):
 	overlayFilename = "/tmp/pdfOverlay"+str(random.randint(100000,999999))+".pdf"
 
@@ -54,10 +63,10 @@ def generateInvoice(invoice):
 		product = invoice.cellByColumnName("Product "+str(i)).selectedRow
 		if product is not None:
 			try:
-				quantity = int(invoice.cellByColumnName("Quantity "+str(i)).rawData)
+				quantity = tryInt(invoice.cellByColumnName("Quantity "+str(i)).rawData)
 			except:
 				quantity = 1
-			unitPrice = int(product.cellByColumnName("Unit Price").rawData)
+			unitPrice = tryInt(product.cellByColumnName("Unit Price").rawData)
 
 			#description
 			can.drawString(descOffset, tableTopOffset-(i*17), product.cellByColumnName("Description").rawData)
