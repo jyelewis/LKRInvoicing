@@ -72,20 +72,20 @@ def generateInvoice(invoice):
 			can.drawString(descOffset, tableTopOffset-(i*17), product.cellByColumnName("Description").rawData)
 
 			#quantitiy
-			can.drawString(quantityOffset, tableTopOffset-(i*17), str(quantity))
+			can.drawString(quantityOffset, tableTopOffset-(i*17), str("%.2f" % quantity))
 
 			#unit price
-			can.drawString(priceOffset, tableTopOffset-(i*17), "$"+str(unitPrice))
+			can.drawString(priceOffset, tableTopOffset-(i*17), "$"+str("%.2f" % unitPrice))
 
 			#cost
-			can.drawString(costOffset, tableTopOffset-(i*17), "$"+str(quantity*unitPrice))
+			can.drawString(costOffset, tableTopOffset-(i*17), "$"+str("%.2f" % (quantity*unitPrice)))
 
 			TotalCost += quantity*unitPrice
 
 
 
 	#total
-	can.drawString(costOffset, 315, "$"+str(TotalCost)) #Term
+	can.drawString(costOffset, 315, "$"+str("%.2f" % TotalCost)) #Term
 
 
 	can.save()
